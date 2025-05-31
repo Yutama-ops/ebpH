@@ -1,0 +1,52 @@
+[Unit]
+Description=ebpH daemon (Extended BPF Process Homeostasis)
+Documentation=https://github.com/willfindlay/ebpH
+After=network.target
+Wants=network.target
+
+[Service]
+Type=forking
+User=root
+Group=root
+
+# Set working directory
+WorkingDirectory=/opt/ebpH
+
+# Environment variables
+Environment=PYTHONPATH=/opt/ebpH
+Environment=PATH=/opt/ebpH/ebph-venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Use the virtual environment python
+ExecStart=/opt/ebpH/ebph-venv/bin/python3 /opt/ebpH/bin/ebphd start
+ExecStop=/opt/ebpH/ebph-venv/bin/python3 /opt/ebpH/bin/ebphd stop
+ExecReload=/opt/ebpH/ebph-venv/bin/python3 /opt/ebpH/bin/ebphd reload
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Security settings (but allow eBPF operations)
+NoNewPrivileges=false
+ProtectSystem=false
+ProtectHome=false
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ebphd
+
+# PID file location
+PIDFile=/run/ebphd.pid
+
+# Timeout settings
+TimeoutStartSec=60
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target
